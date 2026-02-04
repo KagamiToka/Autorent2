@@ -1,32 +1,49 @@
 <%- include('../partials/header') %>
-<div class="row bg-white p-4 rounded shadow-sm">
-    <div class="col-md-7">
-        <img src="<%= car.image || 'https://via.placeholder.com/600x400' %>" class="img-fluid rounded w-100">
-    </div>
-    <div class="col-md-5">
-        <h2 class="fw-bold"><%= car.name %></h2>
-        <h3 class="text-danger my-3"><%= car.price.toLocaleString() %> đ/ngày</h3>
-        <p><b>Chủ xe:</b> <%= car.ownerId ? car.ownerId.fullName : 'Hệ thống' %></p>
-        <p><%= car.description || 'Chưa có mô tả' %></p>
-        
-        <div class="card bg-light border-0 mt-4">
-            <div class="card-body">
-                <h4>📅 Đặt xe này</h4>
-                <form id="bookingForm">
-                    <input type="hidden" id="carId" value="<%= car._id %>">
-                    <div class="mb-3">
-                        <label>Ngày nhận</label>
-                        <input type="date" id="startDate" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Ngày trả</label>
-                        <input type="date" id="endDate" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100 py-2">XÁC NHẬN ĐẶT</button>
-                </form>
+
+<div class="mb-3">
+    <a href="/" class="text-decoration-none text-muted">← Quay lại danh sách</a>
+</div>
+
+<div class="card border-0 shadow-sm bg-white">
+    <div class="card-body p-4"> <div class="row"> <div class="col-md-7 mb-4 mb-md-0">
+                <img src="<%= car.image || 'https://via.placeholder.com/600x400' %>" 
+                     class="img-fluid rounded w-100" 
+                     style="object-fit: cover; max-height: 400px;" 
+                     alt="<%= car.name %>">
             </div>
-        </div>
-    </div>
+
+            <div class="col-md-5">
+                <h2 class="fw-bold"><%= car.name %></h2>
+                <h3 class="text-danger fw-bold my-3"><%= car.price.toLocaleString() %> đ/ngày</h3>
+                
+                <ul class="list-unstyled text-muted mb-4">
+                    <li class="mb-2"><strong>Chủ xe:</strong> <%= car.ownerId ? car.ownerId.fullName : 'Hệ thống' %></li>
+                    <li class="mb-2"><strong>Mô tả:</strong> <%= car.description || 'Chưa có mô tả' %></li>
+                </ul>
+                
+                <hr>
+
+                <div class="bg-light p-3 rounded">
+                    <h5 class="mb-3">📅 Đặt xe này</h5>
+                    <form id="bookingForm">
+                        <input type="hidden" id="carId" value="<%= car._id %>">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Ngày nhận</label>
+                            <input type="date" id="startDate" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Ngày trả</label>
+                            <input type="date" id="endDate" class="form-control" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-2">XÁC NHẬN ĐẶT</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div> </div>
 </div>
 
 <script>
@@ -60,12 +77,12 @@
             const data = await res.json();
 
             if (res.ok) {
-                alert('Đặt xe thành công!');
+                alert('🎉 Đặt xe thành công!');
                 window.location.href = '/my-bookings';
             } else {
                 alert(data.error || 'Lỗi đặt xe');
             }
-        } catch (err) { alert('Lỗi kết nối'); }
+        } catch (err) { alert('Lỗi kết nối Server'); }
     });
 </script>
 <%- include('../partials/footer') %>
