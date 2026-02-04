@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+<div class="row bg-white p-4 rounded shadow-sm">
+    <div class="col-md-7">
+        <img src="<%= car.image || 'https://via.placeholder.com/600x400' %>" class="img-fluid rounded w-100">
+    </div>
+    <div class="col-md-5">
+        <h2 class="fw-bold"><%= car.name %></h2>
+        <h3 class="text-danger my-3"><%= car.price.toLocaleString() %> đ/ngày</h3>
+        <p><b>Chủ xe:</b> <%= car.ownerId ? car.ownerId.fullName : 'Hệ thống' %></p>
+        <p><%= car.description || 'Chưa có mô tả' %></p>
+        
+        <div class="card bg-light border-0 mt-4">
+            <div class="card-body">
+                <h4>📅 Đặt xe này</h4>
+                <form id="bookingForm">
+                    <input type="hidden" id="carId" value="<%= car._id %>">
+                    <div class="mb-3">
+                        <label>Ngày nhận</label>
+                        <input type="date" id="startDate" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Ngày trả</label>
+                        <input type="date" id="endDate" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2">XÁC NHẬN ĐẶT</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+
+        if (!user || !token) {
+            alert('Vui lòng đăng nhập để đặt xe!');
+            window.location.href = '/login';
+            return;
+        }
+
+        const payload = {
+            userId: user._id,
+            carId: document.getElementById('carId').value,
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value
+        };
+
+        try {
+            const res = await fetch('/api/v1/bookings', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert('Đặt xe thành công!');
+                window.location.href = '/my-bookings';
+            } else {
+                alert(data.error || 'Lỗi đặt xe');
+            }
+        } catch (err) { alert('Lỗi kết nối'); }
+    });
+</script>
+<%- include('../partials/footer') %>

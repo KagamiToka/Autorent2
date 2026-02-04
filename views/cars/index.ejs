@@ -1,0 +1,26 @@
+<%- include('../partials/header') %>
+<div class="text-center mb-5">
+    <h1>Tìm Xe Ưng Ý</h1>
+    <p class="text-muted">Hàng trăm mẫu xe đang chờ bạn trải nghiệm</p>
+</div>
+
+<div class="row">
+    <% if (cars.length === 0) { %>
+        <div class="alert alert-info text-center w-100">Hiện chưa có xe nào trống.</div>
+    <% } else { %>
+        <% cars.forEach(car => { %>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="<%= car.image || 'https://via.placeholder.com/300x200' %>" class="card-img-top">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold"><%= car.name %></h5>
+                        <p class="text-muted small"><%= car.brand %> • <%= car.transmission %></p>
+                        <h4 class="text-success"><%= car.price.toLocaleString() %> đ/ngày</h4>
+                        <a href="/cars/<%= car._id %>" class="btn btn-outline-primary mt-auto w-100">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>
+<%- include('../partials/footer') %>

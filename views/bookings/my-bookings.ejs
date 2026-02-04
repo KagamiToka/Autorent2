@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+<h2 class="mb-4">📋 Lịch sử thuê xe của tôi</h2>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Xe</th>
+                    <th>Thời gian</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="bookingTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadBookings() {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        if (!user) return window.location.href = '/login';
+
+        const res = await fetch(`/api/v1/bookings/user/${user._id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bookings = await res.json();
+        const table = document.getElementById('bookingTable');
+
+        if (bookings.length === 0) {
+            table.innerHTML = '<tr><td colspan="4" class="text-center py-4">Chưa có đơn hàng nào</td></tr>';
+            return;
+        }
+
+        bookings.forEach(b => {
+            const html = `
+                <tr>
+                    <td class="fw-bold">${b.carId ? b.carId.name : 'Xe đã xóa'}</td>
+                    <td>${new Date(b.startDate).toLocaleDateString()} - ${new Date(b.endDate).toLocaleDateString()}</td>
+                    <td>${b.totalPrice ? b.totalPrice.toLocaleString() : '---'} đ</td>
+                    <td><span class="badge bg-secondary">${b.status}</span></td>
+                </tr>
+            `;
+            table.innerHTML += html;
+        });
+    }
+    loadBookings();
+</script>
+<%- include('../partials/footer') %>

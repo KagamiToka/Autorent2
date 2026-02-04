@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-warning">🚗 Quản lý Xe & Đơn Hàng</h2>
+    <a href="/owner/create-car" class="btn btn-success fw-bold">+ Đăng Xe Mới</a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">Danh sách khách thuê xe của tôi</div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Xe</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày thuê</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="ownerTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadOwnerData() {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        
+        if (!user || user.role !== 'OWNER') {
+            alert('Bạn không có quyền truy cập trang này!');
+            window.location.href = '/';
+            return;
+        }
+
+        const res = await fetch(`/api/v1/bookings/owner/my-bookings?ownerId=${user._id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const bookings = await res.json();
+        const table = document.getElementById('ownerTable');
+
+        bookings.forEach(b => {
+            const html = `
+                <tr>
+                    <td>${b.carId.name}</td>
+                    <td>${b.userId.fullName}<br><small>${b.userId.phone}</small></td>
+                    <td>${new Date(b.startDate).toLocaleDateString()} - ${new Date(b.endDate).toLocaleDateString()}</td>
+                    <td>${b.totalPrice.toLocaleString()} đ</td>
+                    <td><span class="badge bg-info">${b.status}</span></td>
+                    <td>
+                        ${b.status === 'PENDING' ? 
+                            `<button class="btn btn-success btn-sm" onclick="approveBooking('${b._id}')">✅ Duyệt đơn</button>` 
+                            : '<span class="text-muted">Đã xử lý</span>'}
+                    </td>
+                </tr>
+            `;
+            table.innerHTML += html;
+        });
+    }
+
+    async function approveBooking(id) {
+        if(!confirm('Xác nhận cho thuê xe?')) return;
+        const token = localStorage.getItem('token');
+        
+        const res = await fetch(`/api/v1/bookings/${id}/confirm`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if(res.ok) {
+            alert('Đã duyệt đơn và tạo hợp đồng!');
+            location.reload();
+        } else {
+            alert('Lỗi khi duyệt đơn');
+        }
+    }
+
+    loadOwnerData();
+</script>
+<%- include('../partials/footer') %>

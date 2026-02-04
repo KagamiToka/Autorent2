@@ -1,0 +1,67 @@
+<%- include('../partials/header') %>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h4>ĐĂNG KÝ TÀI KHOẢN</h4>
+            </div>
+            <div class="card-body p-4">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label>Họ tên</label>
+                        <input type="text" id="fullName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Số điện thoại</label>
+                        <input type="text" id="phone" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Mật khẩu</label>
+                        <input type="password" id="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Vai trò</label>
+                        <select id="role" class="form-select">
+                            <option value="CUSTOMER">Khách thuê xe</option>
+                            <option value="OWNER">Chủ xe (Cho thuê)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Đăng Ký</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        try {
+            const res = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert('Đăng ký thành công! Vui lòng đăng nhập.');
+                window.location.href = '/login';
+            } else {
+                alert(data.error || 'Lỗi đăng ký');
+            }
+        } catch (err) { alert('Lỗi kết nối'); }
+    });
+</script>
+<%- include('../partials/footer') %>

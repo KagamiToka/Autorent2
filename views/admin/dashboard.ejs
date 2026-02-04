@@ -1,0 +1,110 @@
+<%- include('../partials/header') %>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-danger fw-bold">🛡️ Admin Dashboard</h2>
+        <span class="badge bg-secondary">Admin Panel</span>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-white bg-primary mb-3 shadow">
+                <div class="card-header border-0">Tổng số đơn hàng</div>
+                <div class="card-body">
+                    <h1 class="card-title display-4 fw-bold" id="totalBookings">...</h1>
+                    <p class="card-text">Đơn hàng trong hệ thống</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-white bg-success mb-3 shadow">
+                <div class="card-header border-0">Doanh thu ước tính</div>
+                <div class="card-body">
+                    <h1 class="card-title display-4 fw-bold" id="totalRevenue">...</h1>
+                    <p class="card-text">Tổng giá trị các đơn hàng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white fw-bold">
+            📊 Thống kê chi tiết theo trạng thái
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Trạng thái</th>
+                        <th>Số lượng đơn</th>
+                        <th>Doanh thu nhóm</th>
+                        <th>Tỷ lệ</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTable">
+                    <tr><td colspan="4" class="text-center">Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadAdminStats() {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        // Kiểm tra quyền Admin
+        if (!user || user.role !== 'ADMIN') {
+            alert('⛔ Bạn không có quyền truy cập trang này!');
+            window.location.href = '/';
+            return;
+        }
+
+        try {
+            // Gọi API Admin Stats (Bạn đã có ở backend)
+            const res = await fetch('/api/v1/bookings/admin/summary', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            // Hiển thị Tổng số đơn
+            document.getElementById('totalBookings').innerText = data.total;
+
+            const table = document.getElementById('statsTable');
+            table.innerHTML = '';
+            
+            let totalRevenue = 0;
+
+            // Duyệt qua từng nhóm trạng thái (Pending, Confirmed...)
+            data.breakdown.forEach(item => {
+                totalRevenue += item.totalRevenue; // Cộng dồn doanh thu
+
+                // Màu sắc badge cho đẹp
+                let badgeColor = 'secondary';
+                if(item._id === 'CONFIRMED') badgeColor = 'primary';
+                if(item._id === 'COMPLETED') badgeColor = 'success';
+                if(item._id === 'CANCELLED') badgeColor = 'danger';
+
+                const html = `
+                    <tr>
+                        <td><span class="badge bg-${badgeColor}">${item._id}</span></td>
+                        <td class="fw-bold">${item.count}</td>
+                        <td class="text-success">${item.totalRevenue.toLocaleString()} đ</td>
+                        <td>${Math.round((item.count / data.total) * 100)}%</td>
+                    </tr>
+                `;
+                table.innerHTML += html;
+            });
+
+            // Hiển thị Tổng doanh thu
+            document.getElementById('totalRevenue').innerText = totalRevenue.toLocaleString() + ' đ';
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('statsTable').innerHTML = '<tr><td colspan="4" class="text-center text-danger">Lỗi kết nối Server</td></tr>';
+        }
+    }
+
+    loadAdminStats();
+</script>
+<%- include('../partials/footer') %>
